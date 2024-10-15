@@ -7,26 +7,24 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 1. 加载数据集
+#  加载数据集
 train_data = pd.read_csv('Bayesian_Dataset_train.csv', header=None)
 test_data = pd.read_csv('Bayesian_Dataset_test.csv', header=None)
 
-# 2. 添加列名
+#  添加列名
 columns = ['Age', 'Workclass', 'Fnlwgt', 'Education', 'Marital_Status', 'Occupation',
            'Relationship', 'Race', 'Sex', 'Native_Country', 'Income']
 train_data.columns = columns
 test_data.columns = columns
 
-# 3. 数据预处理
-# 3.1 替换缺失值标记为 NaN（假设缺失值用 '?' 表示）
 train_data.replace(' ?', np.nan, inplace=True)
 test_data.replace(' ?', np.nan, inplace=True)
 
-# 3.2 删除含有缺失值的行
+#  删除含有缺失值的行
 train_data.dropna(inplace=True)
 test_data.dropna(inplace=True)
 
-# 3.3 编码分类变量
+#  编码分类变量
 label_encoders = {}
 for column in train_data.columns:
     if train_data[column].dtype == 'object':
@@ -36,20 +34,20 @@ for column in train_data.columns:
         test_data[column] = le.transform(test_data[column])
         label_encoders[column] = le
 
-# 4. 特征和标签
+#  特征和标签
 X_train = train_data.drop('Income', axis=1)
 y_train = train_data['Income']
 X_test = test_data.drop('Income', axis=1)
 y_test = test_data['Income']
 
-# 5. 模型训练
+#  模型训练
 model = CategoricalNB()
 model.fit(X_train, y_train)
 
-# 6. 模型预测
+#  模型预测
 y_pred = model.predict(X_test)
 
-# 7. 模型评估
+#  模型评估
 precision = precision_score(y_test, y_pred, average='weighted')
 recall = recall_score(y_test, y_pred, average='weighted')
 f1 = f1_score(y_test, y_pred, average='weighted')
@@ -61,18 +59,18 @@ print(f'F1 Score: {f1:.4f}')
 print('\nClassification Report:')
 print(classification_report(y_test, y_pred))
 
-# 8. 结果保存
-# 8.1 将数值标签转换回原始标签
+#  结果保存
+#  将数值标签转换回原始标签
 income_le = label_encoders['Income']
 test_data['Predicted_Income'] = income_le.inverse_transform(y_pred)
 
-# 8.2 保存结果到指定文件
+#  保存结果到指定文件
 output_filename = f'result_precision={precision:.2f}_recall={recall:.2f}_F1 score={f1:.2f}.csv'
 test_data.to_csv(output_filename, index=False)
 print(f'\n结果已保存到文件：{output_filename}')
 
-# 9. 可视化结果
-# 9.1 混淆矩阵
+#  可视化结果
+#  混淆矩阵
 cm = confusion_matrix(y_test, y_pred)
 plt.figure(figsize=(6, 4))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
@@ -82,8 +80,8 @@ plt.ylabel('Actual')
 plt.title('Confusion Matrix')
 plt.show()
 
-# 10. 参数影响探索
-# 10.1 调整平滑参数 alpha 的影响，并分别绘制各类别的指标曲线
+#  参数影响探索
+#  调整平滑参数 alpha 的影响，并分别绘制各类别的指标曲线
 
 alpha_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
